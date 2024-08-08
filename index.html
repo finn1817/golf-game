@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Free Golf Game</title>
+  <style>
+    body {
+      font-family: 'Trebuchet MS', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #87CEEB; /* Sky blue background */
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    canvas {
+      border: 3px solid #663300; /* Brown border */
+      border-radius: 10px;
+      display: block;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background-color: #4CAF50; /* Green button color */
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 0 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      background-color: #45a049; /* Darker green on hover */
+    }
+
+    .how-to-play {
+      max-width: 800px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Free Golf Game</h1>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="buttons">
+      <button onclick="startSinglePlayer()">Play Alone</button>
+      <button onclick="startAIGame()">Play Against AI</button>
+    </div>
+    <div class="how-to-play">
+      <h2>How to Play</h2>
+      <p>Use the arrow keys or WASD to control the player's movement. Press the spacebar to hit the ball. Aim for the hole and try to get the lowest score possible.</p>
+    </div>
+  </div>
+
+  <script>
+    // Set up the canvas and game variables
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let gameState = 'menu';
+    let player, opponent, ball, course;
+
+    // Player and ball properties
+    const playerRadius = 15;
+    const ballRadius = 8;
+    const playerSpeed = 5;
+    const ballSpeed = 70;
+    const ballMaxVelocity = 250;
+    const ballFriction = 0.92;
+    const ballGravity = 0.7;
+
+    // Course properties
+    const courseWidth = 800;
+    const courseHeight = 600;
+    const holeSize = 30;
+    const obstacleCount = 10;
+    const obstacleSize = 60;
+
+    // Game functions
+    function startSinglePlayer() {
+      gameState = 'singlePlayer';
+      player = { x: 100, y: 300, angle: 0, power: 0 };
+      ball = { x: 100, y: 300, vx: 0, vy: 0 };
+      course = generateCourse();
+      gameLoop();
+    }
+
+    function startAIGame() {
+      gameState = 'aiGame';
+      player = { x: 100, y: 300, angle: 0, power: 0 };
+      opponent = { x: 700, y: 300, angle: 0, power: 0 };
+      ball = { x: 100, y: 300, vx: 0, vy: 0 };
+      course = generateCourse();
+      gameLoop();
+    }
+
+    function gameLoop() {
+      // Update game state and draw the scene
+      updateGame();
+      drawScene();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function updateGame() {
+      // Handle player movement
+      handlePlayerMovement();
+
+      // Update ball physics
+      updateBallPhysics();
+
+      // Check for collisions
+      handleCollisions();
+
+      // Check if the ball reached the hole
+      checkHoleReached();
+    }
+
+    function drawScene() {
+      // Clear the canvas
+      ctx.clearRect(0, 0, courseWidth, courseHeight);
+
+      // Draw the course
+      drawCourse(course);
+
+      // Draw the player(s)
+      drawPlayer(player);
+      if (gameState === 'aiGame') {
+        drawPlayer(opponent);
+      }
+
+      // Draw the ball
+      drawBall(ball);
+    }
+
+    function handlePlayerMovement() {
+      // Handle player movement using arrow keys or WASD
+      if (isKeyPressed('ArrowUp') || isKeyPressed('w')) {
+        player.y -= playerSpeed;
+      }
+      if (isKeyPressed('ArrowDown') || isKeyPressed('s')) {
+        player.y += playerSpeed;
+      }
+      if (isKeyPressed('ArrowLeft') || isKeyPressed('a')) {
+        player.x -= playerSpeed;
+      }
+      if (isKeyPressed('ArrowRight') || isKeyPressed('d')) {
+        player.x += playerSpeed;
+      }
+    }
+
+    function updateBallPhysics() {
+      // Update ball velocity and position
+      ball.vx *= ballFriction;
+      ball.vy += ballGravity;
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // Limit ball velocity
+      const velocity = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+      if (velocity > ballMaxVelocity) {
+        ball.vx = (ball.vx / velocity) * ballMaxVelocity;
+        ball.vy = (ball.vy / velocity) * ballMaxVelocity;
+      }
+    }
+
+    function handleCollisions() {
+      // Check for collisions with course boundaries
+      if (ball.x < ballRadius || ball.x > courseWidth - ballRadius) {
+        ball.vx *= -1;
+      }
+      if (ball.y < ballRadius || ball.y > courseHeight - ballRadius) {
+        ball.vy *= -1;
+      }
+
+      // Check for collisions with obstacles
+      for (let i = 0; i < course.obstacles.length; i++) {
+        const obstacle = course.obstacles[i];
+        if (
+          ball.x > obstacle.x - obstacleSize / 2 &&
+          ball.x < obstacle.x + obstacleSize / 2 &&
+          ball.y > obstacle.y - obstacleSize / 2 &&
+          ball.y < obstacle.y + obstacleSize / 2
+        ) {
+          // Bounce the ball off the obstacle
+          const angle = Math.atan2(ball.y - obstacle.y, ball.x - obstacle.x);
+          const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+          ball.vx = speed * Math.cos(angle);
+          ball.vy = speed * Math.sin(angle);
+        }
+      }
+    }
+
+    function checkHoleReached() {
+      // Check if the ball has reached the hole
+      if (
+        ball.x > course.hole.x - holeSize / 2 &&
+        ball.x < course.hole.x + holeSize / 2 &&
+        ball.y > course.hole.y - holeSize / 2 &&
+        ball.y < course.hole.y + holeSize / 2
+      ) {
+        // The ball has reached the hole, handle the scoring and other logic
+        console.log('Ball reached the hole!');
+      }
+    }
+
+    function drawPlayer(player) {
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, playerRadius, 0, 2 * Math.PI);
+      ctx.fillStyle = '#008000'; // Green player
+      ctx.fill();
+    }
+
+    function drawBall(ball) {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ballRadius, 0, 2 * Math.PI);
+      ctx.fillStyle = '#fff'; // White ball
+      ctx.fill();
+    }
+
+    function drawCourse(course) {
+      // Draw the course background
+      ctx.fillStyle = '#006400'; // Dark green course
+      ctx.fillRect(0, 0, courseWidth, courseHeight);
+
+      // Draw obstacles
+      ctx.fillStyle = '#8B4513'; // Brown obstacles
+      for (let i = 0; i < course.obstacles.length; i++) {
+        const obstacle = course.obstacles[i];
+        ctx.fillRect(obstacle.x - obstacleSize / 2, obstacle.y - obstacleSize / 2, obstacleSize, obstacleSize);
+      }
+
+      // Draw the hole
+      ctx.fillStyle = '#FFFF00'; // Yellow hole
+      ctx.beginPath();
+      ctx.arc(course.hole.x, course.hole.y, holeSize / 2, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+
+    function generateCourse() {
+      // Generate a random course layout
+      return {
+        obstacles: [
+          { x: 200, y: 300 },
+          { x: 500, y: 100 },
+          { x: 400, y: 400 },
+          { x: 700, y: 200 },
+          { x: 300, y: 500 },
+          { x: 150, y: 150 },
+          { x: 600, y: 400 },
+          { x: 450, y: 250 },
+          { x: 250, y: 450 },
+          { x: 650, y: 150 }
+        ],
+        hole: {
+          x: courseWidth - holeSize / 2,
+          y: courseHeight - holeSize / 2
+        }
+      };
+    }
+
+    function isKeyPressed(key) {
+      return !!window.keyPressed[key];
+    }
+
+    window.addEventListener('keydown', (event) => {
+      window.keyPressed = window.keyPressed || {};
+      window.keyPressed[event.key] = true;
+    });
+
+    window.addEventListener('keyup', (event) => {
+      window.keyPressed = window.keyPressed || {};
+      window.keyPressed[event.key] = false;
+    });
+
+    // Start the game
+    startSinglePlayer();
+  </script>
+</body>
+</html>
