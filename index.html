@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Free Golf Game</title>
+  <title>Vintage Golf Game</title>
   <style>
     body {
-      font-family: 'Trebuchet MS', sans-serif;
+      font-family: 'Courier New', monospace;
       margin: 0;
       padding: 0;
-      background-color: #87CEEB; /* Sky blue background */
+      background-color: #333;
     }
 
     .container {
@@ -19,23 +19,23 @@
     }
 
     h1 {
-      color: #333;
+      color: #fff;
       margin-bottom: 20px;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      font-size: 36px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
 
     canvas {
-      border: 3px solid #663300; /* Brown border */
+      border: 5px solid #663300; /* Brown border */
       border-radius: 10px;
       display: block;
-      margin-bottom: 20px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
 
     .buttons {
       display: flex;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-top: 20px;
     }
 
     button {
@@ -51,32 +51,21 @@
       cursor: pointer;
       border-radius: 5px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      font-family: 'Courier New', monospace;
     }
 
     button:hover {
       background-color: #45a049; /* Darker green on hover */
     }
-
-    .how-to-play {
-      max-width: 800px;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Free Golf Game</h1>
+    <h1>Vintage Golf Game</h1>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <div class="buttons">
       <button id="singlePlayerButton">Play Alone</button>
       <button id="aiGameButton">Play Against AI</button>
-    </div>
-    <div class="how-to-play">
-      <h2>How to Play</h2>
-      <p>Use the arrow keys or WASD to control the player's movement. Press the spacebar to hit the ball. Aim for the hole and try to get the lowest score possible.</p>
     </div>
   </div>
 
