@@ -71,8 +71,8 @@
     <h1>Free Golf Game</h1>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <div class="buttons">
-      <button onclick="startSinglePlayer()">Play Alone</button>
-      <button onclick="startAIGame()">Play Against AI</button>
+      <button id="singlePlayerButton">Play Alone</button>
+      <button id="aiGameButton">Play Against AI</button>
     </div>
     <div class="how-to-play">
       <h2>How to Play</h2>
@@ -298,6 +298,10 @@
       window.keyPressed = window.keyPressed || {};
       window.keyPressed[event.key] = false;
     });
+
+    // Add event listeners to the buttons
+    document.getElementById('singlePlayerButton').addEventListener('click', startSinglePlayer);
+    document.getElementById('aiGameButton').addEventListener('click', startAIGame);
   </script>
 </body>
 </html>
