@@ -65,7 +65,6 @@
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <div class="buttons">
       <button id="singlePlayerButton">Play Alone</button>
-      <button id="aiGameButton">Play Against AI</button>
     </div>
   </div>
 
@@ -74,7 +73,7 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     let gameState = 'menu';
-    let player, opponent, ball, course;
+    let player, ball, course;
 
     // Player and ball properties
     const playerRadius = 15;
@@ -101,20 +100,13 @@
       gameLoop();
     }
 
-    function startAIGame() {
-      gameState = 'aiGame';
-      player = { x: 100, y: 300, angle: 0, power: 0 };
-      opponent = { x: 700, y: 300, angle: 0, power: 0 };
-      ball = { x: 100, y: 300, vx: 0, vy: 0 };
-      course = generateCourse();
-      gameLoop();
-    }
-
     function gameLoop() {
-      // Update game state and draw the scene
-      updateGame();
-      drawScene();
-      requestAnimationFrame(gameLoop);
+      if (gameState === 'singlePlayer') {
+        // Update game state and draw the scene
+        updateGame();
+        drawScene();
+        requestAnimationFrame(gameLoop);
+      }
     }
 
     function updateGame() {
@@ -138,11 +130,8 @@
       // Draw the course
       drawCourse(course);
 
-      // Draw the player(s)
+      // Draw the player
       drawPlayer(player);
-      if (gameState === 'aiGame') {
-        drawPlayer(opponent);
-      }
 
       // Draw the ball
       drawBall(ball);
@@ -288,9 +277,8 @@
       window.keyPressed[event.key] = false;
     });
 
-    // Add event listeners to the buttons
+    // Add event listeners to the button
     document.getElementById('singlePlayerButton').addEventListener('click', startSinglePlayer);
-    document.getElementById('aiGameButton').addEventListener('click', startAIGame);
   </script>
 </body>
 </html>
